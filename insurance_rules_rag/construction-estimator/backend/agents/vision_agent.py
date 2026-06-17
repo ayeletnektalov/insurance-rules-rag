@@ -20,10 +20,14 @@ def vision_agent(state: ConstructionState):
         return state
 
     doc = fitz.open(pdf_path)
+
     page = doc[0]
 
     pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+
     image_bytes = pix.tobytes("png")
+    with open("test_plan.png", "wb") as f:
+        f.write(image_bytes)
 
     doc.close()
 
@@ -38,17 +42,29 @@ def vision_agent(state: ConstructionState):
                     {
                         "type": "text",
                         "text": """
-Analyze this construction plan.
+You are a professional construction estimator and architectural plan analyst.
 
-Identify:
-- walls
-- rooms
-- kitchen
-- bathrooms
-- pipelines
-- demolition work
+Analyze the attached construction plan image.
 
-Return a detailed analysis.
+Your task is to identify and estimate:
+
+- Number of walls
+- Number of rooms
+- Number of kitchens
+- Number of bathrooms
+- Number of doors
+- Number of windows
+- Length of plumbing pipelines
+- Demolition areas
+- Renovation work
+- Structural elements
+
+If information is unclear, provide your best estimate based on the visual plan.
+
+Do NOT say that you cannot analyze the image.
+Do NOT refuse the task.
+
+Return a detailed construction analysis including quantities and observations.
 """
                     },
                     {
@@ -59,7 +75,8 @@ Return a detailed analysis.
                     }
                 ]
             }
-        ]
+        ],
+        temperature=0
     )
 
     vision_analysis = response.choices[0].message.content

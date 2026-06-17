@@ -7,7 +7,12 @@ app = FastAPI(
     title="Construction Estimation System",
     version="1.0.0"
 )
-
+user_prices = {
+    "wall_price": 500,
+    "kitchen_price": 3000,
+    "pipeline_price": 100,
+    "demolition_price": 300
+}
 graph = create_graph()
 
 
@@ -33,7 +38,17 @@ def test_graph():
     )
 
     return result
+@app.post("/set-prices")
+def set_prices(prices: dict):
 
+    global user_prices
+
+    user_prices = prices
+
+    return {
+        "message": "Prices updated successfully",
+        "prices": user_prices
+    }
 
 @app.post("/upload-pdf")
 async def upload_pdf(file: UploadFile = File(...)):
@@ -45,7 +60,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     result = graph.invoke(
         {
-            "prices": {},
+            "prices": user_prices,
             "pdf_path": file_path,
             "pdf_text": "",
             "detected_tasks": {},
